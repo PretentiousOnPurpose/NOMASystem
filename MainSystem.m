@@ -18,7 +18,11 @@ txDataStream = Transmitter(txBitStream, txParams);
 
 %% Channel Model
 % Noise and Channel Tap
-rxDataStream = txDataStream;
+
+SNR = 10 ^ (txParams.SNRdb / 10);
+
+noise = (1 / sqrt(2 * SNR)) .* (randn(length(txDataStream), 1) + (1i) * randn(length(txDataStream), 1));
+rxDataStream = txDataStream;% + noise;
 
 %% Receiver
 % Detecting the information from received signal
