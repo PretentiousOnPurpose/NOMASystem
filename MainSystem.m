@@ -1,19 +1,26 @@
 clc;
 clear all;
 
+%% System Initialisation
 % Random seed set to 100
 rng(100);
 % Initialising System Parameters
 txParams = txConfig();
-% Generating random data
-txBitStream = randi([0, 1], txParams.dataLength, 1);
 
+%% Generating Data
+
+% Generating random data
+txBitStream = randi([0, 1], txParams.dataLength, txParams.numUsers);
+
+%% Data Processing at Tx
 % Passing the data for transmission
 txDataStream = Transmitter(txBitStream, txParams);
 
+%% Channel Model
 % Noise and Channel Tap
 rxDataStream = txDataStream;
 
+%% Receiver
 % Detecting the information from received signal
 rxBitStream = Receiver(rxDataStream, txParams);
 

@@ -6,6 +6,11 @@ function txParams = txConfig()
     txParams.coding.cc.k = 1;
     txParams.coding.cc.n = 2;
     
-    txParams.dataLength = 1000;
+    txParams.dataLength = 960;
+    
+    txParams.numUsers = 5;
+    
+    % Allocate Power levels
+    txParams.powerLevels = linspace(1, txParams.numUsers, txParams.numUsers)';
     
 end
