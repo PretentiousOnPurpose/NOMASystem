@@ -9,9 +9,9 @@ function txParams = txConfig()
     
     txParams.dataLength = 960;
     
-    txParams.numUsers = 5;
+    txParams.numUsers = 2;
     
     % Allocate Power levels
-    txParams.powerLevels = linspace(1, txParams.numUsers, txParams.numUsers)';
+    txParams.powerLevels = 5 * linspace(1, txParams.numUsers, txParams.numUsers)';
     
 end
