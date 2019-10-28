@@ -1,5 +1,5 @@
-% Transmitter: Performs data processing operations like scrambling,
-%              channel coding, qam modulation, etc.
+% Transmitter: Performs data processing operations like power allocation,
+%              channel coding, qam modulation, etc. at the Transmitter End
 % Input: data, txParams
 %        data           - A matrix containing information of multiple user
 %                         where each user is assigned one column.
@@ -11,20 +11,23 @@
 %                         channel coding, scrambling, etc).
 %
 
-function modDataStream = Transmitter(data, txParams)
+function modDataStream = Transmitter(data, txParams)  
     %% Channel Coding
-    % ccCode = CCEncoder(data, txParams);
-    ccCode = data;
     
+    encodedData = channelEncoding(data, txParams);
+
     %% QAM
-    modData = qammod(ccCode, txParams.QAM, 'InputType', 'bit', 'UnitAveragePower', 1);
+    modData = qammod(encodedData, txParams.QAM, 'InputType', 'bit', 'UnitAveragePower', 1);
        
     %% Power Allocation    
-    modDataStream = zeros(txParams.numUsers * length(modData), 1);
-
+    
+    % Allocating required buffer space
+    modDataStream = zeros(length(modData), 1);
+    
+    % Iterating over each user and raising the power of the
+    % respective signal
     for iter_user = 1:txParams.numUsers
-        modDataStream((iter_user - 1) * length(modData) + 1 : iter_user * length(modData), 1) = ...
-            txParams.powerLevels(iter_user) .* modData(:, iter_user);
+        modDataStream = modDataStream + txParams.powerLevels(iter_user) .* modData(:, iter_user);
     end
     
 end

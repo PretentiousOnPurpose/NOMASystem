@@ -1,11 +1,12 @@
-clc;
-clear;
+
+
+qamOrder = 4;
 
 p1 = 1;
 p2 = 2;
 
-x1 = randi([0, 1], 100, 1);
-x2 = randi([0, 1], 100, 1);
+x1 = ones( 960, 1);
+x2 = ones( 960, 1);
 
 y1 = qammod(x1, qamOrder, 'InputType', 'bit', 'UnitAveragePower', 1);
 y2 = qammod(x2, qamOrder, 'InputType', 'bit', 'UnitAveragePower', 1);

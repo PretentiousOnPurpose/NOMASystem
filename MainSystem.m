@@ -17,12 +17,14 @@ txBitStream = randi([0, 1], txParams.dataLength, txParams.numUsers);
 txDataStream = Transmitter(txBitStream, txParams);
 
 %% Channel Model
+
+
+
 % Noise and Channel Tap
 
 SNR = 10 ^ (txParams.SNRdb / 10);
-
 noise = (1 / sqrt(2 * SNR)) .* (randn(length(txDataStream), 1) + (1i) * randn(length(txDataStream), 1));
-rxDataStream = txDataStream;% + noise;
+rxDataStream = txDataStream + noise;
 
 %% Receiver
 % Detecting the information from received signal
@@ -34,5 +36,6 @@ errBits = sum(bitxor(txBitStream, rxBitStream));
 if (~errBits)
     disp('Successful Transmission');
 else
-    disp('Failure');
+    disp('Err Bits:');
+    disp(errBits);
 end
