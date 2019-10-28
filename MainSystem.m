@@ -1,9 +1,11 @@
-clc;
+% clc;
 clear all;
+
+addpath(genpath('Blocks'));
 
 %% System Initialisation
 % Random seed set to 100
-rng(100);
+% rng(100);
 % Initialising System Parameters
 txParams = txConfig();
 
