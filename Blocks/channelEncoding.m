@@ -14,7 +14,5 @@
 
 function encodedData = channelEncoding(data, txParams)   
     % Perform convolutional coding
-    for iter_user = 1:txParams.numUsers
-        encodedData(:, iter_user) = convenc(data(:, iter_user),txParams.coding.cc.trellis);
-    end
+    encodedData = convenc(data, txParams.coding.cc.trellis);
 end

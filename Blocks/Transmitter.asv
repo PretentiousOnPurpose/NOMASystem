@@ -14,14 +14,10 @@
 function modDataStream = Transmitter(data, txParams)  
     %% Channel Coding
     
-    % Allocating buffer for encoding
-    encodedData = zeros(length(data) / txParams.coding.codeRate, txParams.numUsers);
-    
     for iter_user = 1:txParams.numUsers
-        encodedData(:, iter_user) = channelEncoding(data(:, iter_user), txParams);
+        encodedData(:, iter_user) = channelEncoding(data(:, iter_), txParams);
     end
     %% QAM
-    
     modData = qammod(encodedData, txParams.QAM, 'InputType', 'bit', 'UnitAveragePower', 1);
        
     %% Power Allocation    

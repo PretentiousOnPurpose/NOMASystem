@@ -10,28 +10,31 @@ txParams = txConfig();
 %% Generating Data
 
 % Generating random data
-txBitStream = randi([0, 1], txParams.dataLength, txParams.numUsers);
+txBitStreamMat = randi([0, 1], txParams.dataLength, txParams.numUsers);
+
+txParams.test = txBitStreamMat;
 
 %% Data Processing at Tx
 % Passing the data for transmission
-txDataStream = Transmitter(txBitStream, txParams);
+txOut = Transmitter(txBitStreamMat, txParams);
 
 %% Channel Model
 
-
+% We assume that the CSI is perfectly known at the Tx
+txDataStreamMat = txParams.CSI .* txOut;
 
 % Noise and Channel Tap
 
 SNR = 10 ^ (txParams.SNRdb / 10);
-noise = (1 / sqrt(2 * SNR)) .* (randn(length(txDataStream), 1) + (1i) * randn(length(txDataStream), 1));
-rxDataStream = txDataStream + noise;
+noiseMat = (1 / sqrt(2 * SNR)) .* (randn(size(txDataStreamMat)) + (1i) * randn(size(txDataStreamMat)));
+rxDataStreamMat = txDataStreamMat + noiseMat;
 
 %% Receiver
 % Detecting the information from received signal
-rxBitStream = Receiver(rxDataStream, txParams);
+rxBitStreamMat = Receiver(rxDataStreamMat, txParams);
 
 % Error in received bitstream
-errBits = sum(bitxor(txBitStream, rxBitStream));
+errBits = sum(bitxor(txBitStreamMat, rxBitStreamMat));
 
 if (~errBits)
     disp('Successful Transmission');

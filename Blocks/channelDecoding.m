@@ -14,7 +14,9 @@
 
 function data = channelDecoding(encodedData, txParams)   
     % Perform convolutional decoding
-    for iter_user = 1:txParams.numUsers
-        data(:, iter_user) = vitdec(encodedData(:, iter_user), txParams.coding.cc.trellis, 34, 'trunc', 'hard');
+    if (txParams.softQAM)
+        data = vitdec(encodedData, txParams.coding.cc.trellis, 34, 'cont', 'unquant');
+    else
+        data = vitdec(encodedData, txParams.coding.cc.trellis, 34, 'trunc', 'hard');
     end
 end
