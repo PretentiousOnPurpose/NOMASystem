@@ -10,7 +10,8 @@ txParams = txConfig();
 %% Generating Data
 
 % Generating random data
-txBitStreamMat = randi([0, 1], txParams.dataLength, txParams.numUsers);
+txBitStreamMat = randi([0, 1], txParams.dataLength - txParams.coding.cc.tbl, txParams.numUsers);
+txBitStreamMat = [txBitStreamMat; zeros(txParams.coding.cc.tbl, txParams.numUsers)];
 
 txParams.test = txBitStreamMat;
 
