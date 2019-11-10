@@ -18,12 +18,11 @@ function txParams = txConfig()
     txParams.numUsers = 2;
     
     % Assuming the CSI (Rayleigh Fading)
-    txParams.CSI = sort(abs(randn(1, txParams.numUsers)));
+    txParams.CSI = randn(1, txParams.numUsers) + 1i * (randn(1, txParams.numUsers));
+    [~, sortIdx] = sort(abs(txParams.CSI));
+    txParams.CSI = txParams.CSI(sortIdx);
     
-    % Allocate Power levels
-    txParams.powerLevels = [(1 + txParams.CSI(2) / txParams.CSI(1)) (1 + txParams.CSI(1) / txParams.CSI(2))];
-    
-    disp(['Channel:         ' num2str(txParams.CSI)]);
-    disp(['Power Allocated: ' num2str(txParams.powerLevels)]);
+    % Allocating buffer space for power allocation coefficients
+    txParams.powerLevels = zeros(txParams.numUsers, 1);
 
 end
