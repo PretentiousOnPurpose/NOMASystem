@@ -1,9 +1,9 @@
 function txParams = txConfig()
-    txParams.QAM = 2;
+    txParams.QAM = 16;
     txParams.softQAM = 1;
     
     % SNR in db
-    txParams.SNRdb = 10;
+    txParams.SNRdb = 20;
     
     % Trellis Structure for 1/2 code rate convolution coder obtained from
     % a MATLAB tutorial on channel coding. (Constraint length, M = 7)
@@ -18,9 +18,13 @@ function txParams = txConfig()
     txParams.numUsers = 2;
     
     % Assuming the CSI (Rayleigh Fading)
-    txParams.CSI = randn(1, txParams.numUsers) + 1i * (randn(1, txParams.numUsers));
-    [~, sortIdx] = sort(abs(txParams.CSI));
+    txParams.CSI = randn(txParams.numUsers, 1);
+%     txParams.CSI = randn(txParams.numUsers, 1) + 1i * (randn(txParams.numUsers, 1));
+    [~, sortIdx] = sort(abs(txParams.CSI), 'ascend');
     txParams.CSI = txParams.CSI(sortIdx);
+    
+%     txParams.CSI = [1.15; 1.1];
+    txParams.CSI = [0.5; 1];
     
     % Allocating buffer space for power allocation coefficients
     txParams.powerLevels = zeros(txParams.numUsers, 1);

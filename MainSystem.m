@@ -15,24 +15,26 @@ txParams = txConfig();
 % filling algorithm.
 
 % The total power available for allocation
-txParams.sysPower = 100; 
+txParams.sysPower = 17.5; 
 
 % The noise variance is assumed to be 1 but it is later scaled to the
 % meet the SNR criteria.
 
-lambdaInv = (1 / txParams.numUsers) * (txParams.sysPower + sum((sum(abs(txParams.CSI) .^ 2) ./ (abs(txParams.CSI) .^ 2))) - 1);
+%% Calculating the optimal power levels for each user
 
-% Calculating the optimal power levels for each user
+%% Method 1 - Channel Inversion
 for iter_user = 1: txParams.numUsers
-    txParams.powerLevels(iter_user) = lambdaInv - ((sum(abs(txParams.CSI) .^ 2)/ (abs(txParams.CSI(iter_user)) .^ 2)) - 1);
+    txParams.powerLevels(iter_user) = iter_user * 2 / txParams.CSI(iter_user);
 end
+
+txParams.powerLevels = [4 1];
 
 %% Generating Data
 
 % Generating random data
 txBitStreamMat = randi([0, 1], txParams.dataLength - txParams.coding.cc.tbl, txParams.numUsers);
 txBitStreamMat = [txBitStreamMat; zeros(txParams.coding.cc.tbl, txParams.numUsers)];
-
+txParams.test = txBitStreamMat;
 %% Data Processing at Tx
 % Passing the data for transmissioned.
 
@@ -41,7 +43,7 @@ txOut = Transmitter(txBitStreamMat, txParams);
 %% Channel Model
 
 % We assume that the CSI is perfectly known at the Tx
-txDataStreamMat = txParams.CSI .* txOut;
+txDataStreamMat = txParams.CSI' .* txOut;
 
 % Noise and Channel Tap
 
