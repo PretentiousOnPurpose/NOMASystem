@@ -1,9 +1,9 @@
 function txParams = txConfig()
-    txParams.QAM = 16;
+    txParams.QAM = 4;
     txParams.softQAM = 1;
     
     % SNR in db
-    txParams.SNRdb = 20;
+    txParams.SNRdb = 12;
     
     % Trellis Structure for 1/2 code rate convolution coder obtained from
     % a MATLAB tutorial on channel coding. (Constraint length, M = 7)
@@ -23,9 +23,7 @@ function txParams = txConfig()
     [~, sortIdx] = sort(abs(txParams.CSI), 'ascend');
     txParams.CSI = txParams.CSI(sortIdx);
     
-%     txParams.CSI = [1.15; 1.1];
-    txParams.CSI = [0.5; 1];
-    
+    txParams.CSI = [0.5; 1.25];
     % Allocating buffer space for power allocation coefficients
     txParams.powerLevels = zeros(txParams.numUsers, 1);
 

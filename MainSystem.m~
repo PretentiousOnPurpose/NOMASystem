@@ -27,10 +27,14 @@ txParams.sysPower = 5;
 % w2 = txParams.BWRatio(2);
 
 channelGains = abs(txParams.CSI) .^ 2;
-esp = 0.02;
+esp = 0.0005;
 
-w1 = ((channelGains(2) / sum(channelGains))) + esp;
-w2 = ((channelGains(1) / sum(channelGains))) - esp;
+disp(txParams.CSI);
+
+w1 = ((channelGains(2) / sum(channelGains)));
+w2 = ((channelGains(1) / sum(channelGains)));
+
+w1 
 
 r1 = abs(txParams.CSI(1)) .^ 2;
 r2 = abs(txParams.CSI(2)) .^ 2;
