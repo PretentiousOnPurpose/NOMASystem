@@ -1,6 +1,6 @@
 function txParams = txConfig()
-    txParams.QAM = 2;
-    txParams.softQAM = 1;
+    txParams.QAM = ;
+    txParams.softQAM = 0;
     
     % SNR in db
     txParams.SNRdb = 30;
@@ -23,8 +23,6 @@ function txParams = txConfig()
     [~, sortIdx] = sort(abs(txParams.CSI), 'ascend');
     txParams.CSI = txParams.CSI(sortIdx);
 
-    disp(['Channel: ', num2str(txParams.CSI')]);
-    
     %% Power Allocation
     % We calculate the optimal values for power allocation coefficients using
     % the method of Lagrange Multipliers. 

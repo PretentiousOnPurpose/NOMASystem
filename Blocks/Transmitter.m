@@ -11,19 +11,24 @@
 %                         channel coding, scrambling, etc).
 %
 
-function modDataStream = Transmitter(data, txParams)  
+function [modDataStream, txParams] = Transmitter(data, txParams)  
     %% Channel Coding
     
     % Allocating buffer for encoding
     encodedData = zeros(length(data) / txParams.coding.codeRate, txParams.numUsers);
-    
+    txParams.test.decodedData = data;
     for iter_user = 1:txParams.numUsers
         encodedData(:, iter_user) = channelEncoding(data(:, iter_user), txParams);
     end
+    
+    txParams.test.encodedData = encodedData;
+    
     %% QAM
     
     modData = qammod(encodedData, txParams.QAM, 'InputType', 'bit', 'UnitAveragePower', 1);
-       
+    txParams.test.modData = modData;
+
+    
     %% Power Allocation    
     
     % Allocating required buffer space

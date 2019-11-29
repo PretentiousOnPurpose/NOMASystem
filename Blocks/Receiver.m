@@ -22,9 +22,9 @@ function data = Receiver(rxDataStreamMat, txParams)
             % Detecting the signal in increasing order of the SNR / Channel
             % Conditions
             if (txParams.softQAM)
-                decodedData = qamdemod(rxDataStream / (txParams.powerLevels(iter_user) * txParams.CSI(iter_channel)), txParams.QAM, 'OutputType', 'approxllr', 'UnitAveragePower', true);
+                decodedData = qamdemod(rxDataStream / (txParams.powerLevels(iter_user) * txParams.CSI(iter_channel)'), txParams.QAM, 'OutputType', 'approxllr', 'UnitAveragePower', true);
             else
-                decodedData = qamdemod(rxDataStream / (txParams.powerLevels(iter_user) * txParams.CSI(iter_channel)), txParams.QAM, 'OutputType', 'bit', 'UnitAveragePower', true);
+                decodedData = qamdemod(rxDataStream / (txParams.powerLevels(iter_user) * txParams.CSI(iter_channel)'), txParams.QAM, 'OutputType', 'bit', 'UnitAveragePower', true);
             end
             decodedData = channelDecoding(decodedData, txParams);
 
@@ -41,3 +41,12 @@ function data = Receiver(rxDataStreamMat, txParams)
         data(:, iter_channel) = decodedData;
     end
 end
+
+
+
+%             if (txParams.softQAM)
+%                 decodedData = qamdemod(rxDataStream / (txParams.powerLevels(iter_user) * ((txParams.CSI(iter_channel) * conj(txParams.CSI(iter_channel))) / (abs(txParams.CSI(iter_channel)) .^ 2))), txParams.QAM, 'OutputType', 'approxllr', 'UnitAveragePower', true);
+%             else
+%                 decodedData = qamdemod(rxDataStream / (txParams.powerLevels(iter_user) * ((txParams.CSI(iter_channel) * conj(txParams.CSI(iter_channel))) / (abs(txParams.CSI(iter_channel)) .^ 2))), txParams.QAM, 'OutputType', 'bit', 'UnitAveragePower', true);
+%             end
+%  
