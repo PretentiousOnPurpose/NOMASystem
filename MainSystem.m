@@ -1,14 +1,13 @@
-function [errBits, empSNR] = MainSystem(SNRdb)
+function [errBits] = MainSystem(sysPower)
 
     addpath(genpath('Blocks'));
 
     %% System Initialisation
     % Random seed set to 100
-    % rng(100);
+%     rng(190);
     % Initialising System Parameters
     txParams = txConfig();
-    txParams.SNRdb = SNRdb;
-
+    txParams.sysPower = sysPower;
 
     %% Calculating the optimal power levels for each user
 
@@ -17,39 +16,48 @@ function [errBits, empSNR] = MainSystem(SNRdb)
 %     w1 = txParams.BWRatio(1);
 %     w2 = txParams.BWRatio(2);
 
-    channelGains = abs(txParams.CSI) .^ 2;
-    esp = 0.02;
+    if (txParams.pwrAlloc == 1)
 
-    w1 = ((channelGains(2) / sum(channelGains))) + esp;
-    w2 = ((channelGains(1) / sum(channelGains))) - esp;
+        channelGains = abs(txParams.CSI) .^ 2;
+        esp = 0.02;
 
-    r1 = abs(txParams.CSI(1)) .^ 2;
-    r2 = abs(txParams.CSI(2)) .^ 2;
+        w1 = ((channelGains(2) / sum(channelGains))) + esp;
+        w2 = ((channelGains(1) / sum(channelGains))) - esp;
 
-    txParams.powerLevels(2) = txParams.sysPower * ((w1 * r1 - w2 * r2) / (r1 * r2 * (w2 - w1)));
-    txParams.powerLevels(1) = txParams.sysPower - txParams.powerLevels(2);
+        r1 = abs(txParams.CSI(1)) .^ 2;
+        r2 = abs(txParams.CSI(2)) .^ 2;
+
+        txParams.powerLevels(2) = txParams.sysPower * ((w1 * r1 - w2 * r2) / (r1 * r2 * (w2 - w1)));
+        txParams.powerLevels(1) = txParams.sysPower - txParams.powerLevels(2);
 
     %% Method 2 - CSI based Power Allocation
 
-    for iter_user = 1:txParams.numUsers
-        txParams.powerLevels(iter_user) = txParams.sysPower / ((abs(txParams.CSI(iter_user)) .^ 2) * sum(1 ./ (abs(txParams.CSI) .^ 2)));
-    end
+    elseif (txParams.pwrAlloc == 2)
+    
+        for iter_user = 1:txParams.numUsers
+            txParams.powerLevels(iter_user) = txParams.sysPower / ((abs(txParams.CSI(iter_user)) .^ 2) * sum(1 ./ (abs(txParams.CSI) .^ 2)));
+        end
 
     %% Method 3 - KKT Optimization with QoS Threshold
-        
+       
+    elseif (txParams.pwrAlloc == 3)
     
-    R1 = 1;
-    w1 = 2 ^ R1;
-    
-    txParams.powerLevels(1) = ((w1 - 1) / w1) * (txParams.sysPower + (1 / (abs(txParams.CSI(1)) .^ 2)));
-    
-    if (txParams.powerLevels(1) < 0)
-        txParams.powerLevels(1) = 0;
+        R1 = 1;
+        w1 = 2 ^ R1;
+
+        txParams.powerLevels(1) = ((w1 - 1) / w1) * (txParams.sysPower + (1 / ((abs(txParams.CSI(1)) .^ 2) * txParams.SNR)));
+
+        if (txParams.powerLevels(1) <= 0)
+            txParams.powerLevels(1) = 0.1;
+        elseif (txParams.powerLevels(1) > txParams.sysPower)
+            txParams.powerLevels(1) = txParams.sysPower - 0.1;
+        end
+
+        txParams.powerLevels(2) = txParams.sysPower - txParams.powerLevels(1);
     end
-        
-    txParams.powerLevels(2) = txParams.sysPower - txParams.powerLevels(1);
-
-
+    
+%     disp(['Power: ', num2str(txParams.powerLevels')]);
+    
     txParams.powerLevels = sqrt(txParams.powerLevels);
     
     %% Generating Data
@@ -70,7 +78,7 @@ function [errBits, empSNR] = MainSystem(SNRdb)
 
     % Noise and Channel Tap
 
-    SNR = 10 ^ (txParams.SNRdb / 10);
+    SNR = txParams.SNR;
     noiseMat = (max(txParams.powerLevels) / sqrt(2 * SNR)) .* (randn(size(txDataStreamMat)) + (1i) * randn(size(txDataStreamMat)));
 
     signalPower = norm(txOut) .^ 2;

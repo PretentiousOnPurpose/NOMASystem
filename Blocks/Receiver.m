@@ -34,7 +34,7 @@ function data = Receiver(rxDataStreamMat, txParams)
 
             y_hat = qammod(encodedData, txParams.QAM, 'InputType', 'bit', 'UnitAveragePower', 1);
             % Removing intereferring signals  
-            rxDataStream = rxDataStream - (txParams.powerLevels(iter_user) * txParams.CSI(iter_channel)) .* y_hat;      
+            rxDataStream = rxDataStream - (txParams.powerLevels(iter_user) * txParams.CSI(iter_channel)') .* y_hat;      
 
         end
         

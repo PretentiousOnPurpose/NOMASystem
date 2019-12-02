@@ -1,4 +1,4 @@
-function Testing()
+function TestingSNR()
     SNRRange = 0:2.5:30;
     numIter = 1000;
     
