@@ -1,5 +1,6 @@
-function [errBits] = MainSystem(sysPower)
+function [errBits] = MainSystem()
 
+    sysPower = 1;
     addpath(genpath('Blocks'));
 
     %% System Initialisation
@@ -8,7 +9,28 @@ function [errBits] = MainSystem(sysPower)
     % Initialising System Parameters
     txParams = txConfig();
     txParams.sysPower = sysPower;
+    
+    %% Uplink Channel Estimation
 
+    % Simulate UE Uplink Tx
+    N = txParams.OFDM.N;
+    cp = txParams.OFDM.cp;
+    
+    ULTx_Stream = UplinkTx(txParams);
+    
+    % Adding a Single Tap Rayleigh fading channel and AWGN Noise
+    UL_Channel = (1 / sqrt(2)) * (randn(1, txParams.numUsers) + 1i * randn(1, txParams.numUsers));
+    UL_Noise = 0 * (1 / sqrt(2 * txParams.SNR * N)) * (randn((N + cp), txParams.numUsers) + 1i * randn((N + cp), txParams.numUsers));
+    
+    ULRx_Stream = ULTx_Stream .* UL_Channel + UL_Noise;
+    
+    txParams.CSI = UplinkRx(ULRx_Stream, txParams);
+    
+    x = 10;
+    % Detect User signal
+    
+    % Estimate CSI
+    
     %% Calculating the optimal power levels for each user
 
     % Method 1 - KKT Based Lagrange Multiplier Method

@@ -1,0 +1,14 @@
+function CSI = UplinkRx(ULRx_Stream, txParams)
+    numUsers = txParams.numUsers;
+    N = txParams.OFDM.N;
+    cp = txParams.OFDM.cp;
+    DataCarriers = txParams.ulTx.DataCarriers;
+    
+    CSI = zeros(numUsers, 1); 
+    
+    for iter_user = 1: numUsers
+        ULRx_User = ULRx_Stream((iter_user - 1) * (N + cp) + cp + 1: iter_user * (N + cp));
+        ULRx_User_Data = ULRx_User(DataCar
+    end
+    
+end

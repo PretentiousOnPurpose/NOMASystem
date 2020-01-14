@@ -5,8 +5,6 @@ function txParams = txConfig()
     % SNR Config
     txParams.SNRdb = 10;
     txParams.SNR = 10 ^ (txParams.SNRdb / 10);
-
-    txParams.SNR = 1e-10;
     
     % Trellis Structure for 1/2 code rate convolution coder obtained from
     % a MATLAB tutorial on channel coding. (Constraint length, M = 7)
@@ -43,4 +41,28 @@ function txParams = txConfig()
     % Allocating buffer space for power allocation coefficients
     txParams.powerLevels = zeros(txParams.numUsers, 1);
 
+    %% OFDM Symbol Structure
+    OFDM.N = 1024;
+    OFDM.cp = OFDM.N / 8;
+    OFDM.GuardInt1 = 0;
+    OFDM.GuardInt2 = 0;
+    OFDM.DCSpacing = 5;
+    OFDM.DCSpacingCarriers = OFDM.N / 2 - ((OFDM.DCSpacing - 1) / 2): OFDM.N / 2 + ((OFDM.DCSpacing - 1) / 2); 
+    OFDM.numDataCarriers = OFDM.N - OFDM.GuardInt1 - OFDM.GuardInt2 - OFDM.DCSpacing;
+    OFDM.DataCarriers = setdiff(1:OFDM.N, OFDM.DCSpacingCarriers);
+    
+    txParams.OFDM = OFDM;
+    
+   %% Uplink Transmission Parameters
+
+    ULTx.zcRoots = nthprime(1: txParams.numUsers);
+    ULTx.zcLen = OFDM.numDataCarriers;
+    ULTx.zcSeq = zeros(ULTx.zcLen, txParams.numUsers);
+    
+    for iter_user = 1: txParams.numUsers
+        ULTx.zcSeq(:, iter_user) = lteZadoffChuSeq(ULTx.zcRoots(iter_user), ULTx.zcLen);
+    end
+
+    txParams.ULTx = ULTx;
+    
 end
