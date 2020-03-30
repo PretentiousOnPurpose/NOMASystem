@@ -16,28 +16,44 @@ function [modDataStream, txParams] = Transmitter(data, txParams)
     
     % Allocating buffer for encoding
     encodedData = zeros(length(data) / txParams.coding.codeRate, txParams.numUsers);
-    txParams.test.decodedData = data;
     for iter_user = 1:txParams.numUsers
         encodedData(:, iter_user) = channelEncoding(data(:, iter_user), txParams);
     end
     
-    txParams.test.encodedData = encodedData;
-    
     %% QAM
-    
     modData = qammod(encodedData, txParams.QAM, 'InputType', 'bit', 'UnitAveragePower', 1);
-    txParams.test.modData = modData;
-
     
     %% Power Allocation    
     
-    % Allocating required buffer space
-    modDataStream = zeros(length(modData), 1);
+    % User Pairing
+    txParams.userPairs = zeros(txParams.numUsers / 2, 2);
     
-    % Iterating over each user and raising the power of the
-    % respective signal
-    for iter_user = 1:txParams.numUsers
-        modDataStream = modDataStream + txParams.powerLevels(iter_user) .* modData(:, iter_user);
+    for iter_pairs = 1: txParams.numUsers / 2
+        txParams.userPairs(iter_pairs, 1) = txParams.CSI(txParams.sorted_CSI_Idx(iter_pairs), 1);
+        txParams.userPairs(iter_pairs, 2) = txParams.CSI(txParams.sorted_CSI_Idx(txParams.numUsers - iter_pairs + 1), 1);
     end
+    % Calculate Power coefficients for each pair
+    txParams.powerCoeffs = zeros(txParams.numUsers, 1);
+    
+    if (txParams.pwrAllocMthd == 1)
+        for iter_pairs = 1: txParams.numUsers / 2
+            txParams.powerCoeffs(txParams.sorted_CSI_Idx(iter_pair, 1), 1) = (sqrt(1 + txParams.sysPower * abs(txParams.est_CSI(txParams.sorted_CSI_Idx(iter_pair, 1), 2)) .^ 2) - 1) / (txParams.sysPower * abs(txParams.est_CSI(txParams.sorted_CSI_Idx(iter_pair, 1), 2)));
+            txParams.powerCoeffs(txParams.sorted_CSI_Idx(iter_pair, 2), 1) = txParams.sysPower - txParams.powerCoeffs(txParams.sorted_CSI_Idx(iter_pair, 1), 1);
+        end
+    elseif (txParams.pwrAllocMthd == 2)
+        for iter_pairs = 1: txParams.numUsers / 2
+            txParams.powerCoeffs(txParams.sorted_CSI_Idx(iter_pair, 1), 1) = (sqrt(1 + txParams.sysPower * abs(txParams.est_CSI(txParams.sorted_CSI_Idx(iter_pair, 1), 2)) .^ 2) - 1) / (txParams.sysPower * abs(txParams.est_CSI(txParams.sorted_CSI_Idx(iter_pair, 1), 2)));
+            txParams.powerCoeffs(txParams.sorted_CSI_Idx(iter_pair, 2), 1) = txParams.sysPower - txParams.powerCoeffs(txParams.sorted_CSI_Idx(iter_pair, 1), 1);
+        end        
+    end
+    
+    % Assign them to OFDM 
+    N = txParams.OFDM.N;
+    cp = txParams.OFDM.cp;
+    numDataCarriers = length(txParams.OFDM.DataCarriers);
+    
+    modDataFrame = zeros(N, modLen / numDataCarriers);
+    modDataStream = zeros(N + cp, modLen / numDataCarriers);    
+    
     
 end
