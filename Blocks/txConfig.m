@@ -18,7 +18,7 @@ function txParams = txConfig()
     
     txParams.slotLen = txParams.dataLength;
     % Number of users
-    txParams.numUsers = 4;
+    txParams.numUsers = 2;
     
 %     % Assuming the CSI (Rayleigh Fading)
 % %     txParams.CSI = randn(txParams.numUsers, 1);

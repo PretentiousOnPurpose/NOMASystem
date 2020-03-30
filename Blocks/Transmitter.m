@@ -46,6 +46,8 @@ function [modDataStream, txParams] = Transmitter(data, txParams)
             txParams.powerCoeffs(txParams.userPairs(iter_pairs, 2), 1) = txParams.sysPower - txParams.powerCoeffs(txParams.userPairs(iter_pairs, 1), 1);
         end        
     end
+
+    disp(txParams.powerCoeffs');
     
     % Assign them to OFDM
     N = txParams.OFDM.N;

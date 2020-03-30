@@ -1,11 +1,11 @@
 function MainSystem()
 
-    sysPower = 5;
+    sysPower = 1;
     addpath(genpath('Blocks'));
 
     %% System Initialisation
     % Random seed set to 2020
-    rng(2020);
+    rng(280);
 
     % Initialising System Parameters
     txParams = txConfig();
@@ -45,7 +45,7 @@ function MainSystem()
     % Noise
 
     SNR = txParams.SNR;
-    noiseMat = (1 / sqrt(2 * SNR)) .* (randn(size(txOut)) + (1i) * randn(size(txOut)));
+    noiseMat = (sqrt(sysPower) / sqrt(2 * SNR)) .* (randn(size(txOut)) + (1i) * randn(size(txOut)));
 
     signalPower = norm(txOut) .^ 2;
     noisePower = norm(noiseMat) .^ 2;
@@ -69,5 +69,6 @@ function MainSystem()
         disp(['Err Bits: ', num2str(errBits)]);
     end
 
+    disp(txParams.CSI);
     disp(txParams.CSI(txParams.sorted_CSI_Idx));
 end

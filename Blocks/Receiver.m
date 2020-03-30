@@ -45,13 +45,13 @@ function data = Receiver(rxDataStream, txParams)
             for iter_sic = 1: iter_user
                 P = txParams.powerCoeffs(txParams.userPairs(iter_pairs, iter_sic), 1);
 
-                demodData = qamdemod(pair_data ./ P, txParams.QAM, 'UnitAveragePower', 1, 'OutputType', 'approxllr');
+                demodData = qamdemod(pair_data ./ sqrt(P), txParams.QAM, 'UnitAveragePower', 1, 'OutputType', 'approxllr');
                 usr_data = channelDecoding(demodData, txParams);
 
                 enc_data = channelEncoding(usr_data, txParams);
                 modData = qammod(enc_data, txParams.QAM, 'UnitAveragePower', 1, 'InputType', 'bit');
 
-                pair_data = pair_data - H_hat * P * modData;
+                pair_data = pair_data - H_hat * sqrt(P) * modData;
             end
             data(:, txParams.userPairs(iter_pairs, iter_user)) = usr_data;
         end
