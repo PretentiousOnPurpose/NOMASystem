@@ -10,43 +10,51 @@
 %                         where each user is assigned one column.
 %
 
-function data = Receiver(rxDataStreamMat, txParams)
-    %% Successive Interference Cancellation
+function data = Receiver(rxDataStream, txParams)
     
-    % Allocating required buffer size
+    % System Parameters
+    N = txParams.OFDM.N;
+    cp = txParams.OFDM.cp;
+    numOFDMSyms = txParams.slotLen;
+
     data = zeros(txParams.dataLength, txParams.numUsers);
     
-    for iter_channel = 1:txParams.numUsers
-        rxDataStream = rxDataStreamMat(:, iter_channel);
-        for iter_user = 1:iter_channel
-            % Detecting the signal in increasing order of the SNR / Channel
-            % Conditions
-            if (txParams.softQAM)
-                decodedData = qamdemod(rxDataStream / (txParams.powerLevels(iter_user) * txParams.CSI(iter_channel)'), txParams.QAM, 'OutputType', 'approxllr', 'UnitAveragePower', true);
-            else
-                decodedData = qamdemod(rxDataStream / (txParams.powerLevels(iter_user) * txParams.CSI(iter_channel)'), txParams.QAM, 'OutputType', 'bit', 'UnitAveragePower', true);
-            end
-            decodedData = channelDecoding(decodedData, txParams);
-
-            % Reconstructing the modulated signal for currently detected
-            % baseband user signal
-            encodedData = channelEncoding(decodedData, txParams);
-
-            y_hat = qammod(encodedData, txParams.QAM, 'InputType', 'bit', 'UnitAveragePower', 1);
-            % Removing intereferring signals  
-            rxDataStream = rxDataStream - (txParams.powerLevels(iter_user) * txParams.CSI(iter_channel)') .* y_hat;      
-
-        end
-        
-        data(:, iter_channel) = decodedData;
+    % OFDM Demodulator
+    modDataMat = zeros(N, numOFDMSyms);
+    
+    for iter_syms = 1: numOFDMSyms
+        currSym = rxDataStream((iter_syms - 1) * (N + cp) + cp + 1: iter_syms * (N + cp), 1);
+        modDataMat(:, iter_syms) = currSym;
     end
+    
+    modDataMat = fft(modDataMat, N) / sqrt(N);
+    modDataMat = fftshift(modDataMat);
+    
+    % Extracting Superposed Signal
+    modDataMat = modDataMat(txParams.OFDM.DataCarriers(1: txParams.numUsers / 2), :);
+
+    % SIC
+    for iter_pairs = 1: txParams.numUsers / 2
+        pair_data = modDataMat(iter_pairs, :)';
+        for iter_user = 1: 2
+            H = txParams.CSI(txParams.userPairs(iter_pairs, iter_user));
+            H_hat = txParams.est_CSI(txParams.userPairs(iter_pairs, iter_user));
+            
+            pair_data = H * pair_data; % Adding Channel effect
+            pair_data = pair_data / H_hat; % Equalising Channel effect
+            for iter_sic = 1: iter_user
+                P = txParams.powerCoeffs(txParams.userPairs(iter_pairs, iter_sic), 1);
+
+                demodData = qamdemod(pair_data ./ P, txParams.QAM, 'UnitAveragePower', 1, 'OutputType', 'approxllr');
+                usr_data = channelDecoding(demodData, txParams);
+
+                enc_data = channelEncoding(usr_data, txParams);
+                modData = qammod(enc_data, txParams.QAM, 'UnitAveragePower', 1, 'InputType', 'bit');
+
+                pair_data = pair_data - H_hat * P * modData;
+            end
+            data(:, txParams.userPairs(iter_pairs, iter_user)) = usr_data;
+        end
+    end
+    
 end
-
-
-
-%             if (txParams.softQAM)
-%                 decodedData = qamdemod(rxDataStream / (txParams.powerLevels(iter_user) * ((txParams.CSI(iter_channel) * conj(txParams.CSI(iter_channel))) / (abs(txParams.CSI(iter_channel)) .^ 2))), txParams.QAM, 'OutputType', 'approxllr', 'UnitAveragePower', true);
-%             else
-%                 decodedData = qamdemod(rxDataStream / (txParams.powerLevels(iter_user) * ((txParams.CSI(iter_channel) * conj(txParams.CSI(iter_channel))) / (abs(txParams.CSI(iter_channel)) .^ 2))), txParams.QAM, 'OutputType', 'bit', 'UnitAveragePower', true);
-%             end
-%  

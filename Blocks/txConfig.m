@@ -13,10 +13,12 @@ function txParams = txConfig()
     txParams.coding.codeRate = 1/2;
     
     % Length of each message of every user
-    txParams.dataLength = 3481;
+    txParams.dataLength = 3000;
     
+    
+    txParams.slotLen = txParams.dataLength;
     % Number of users
-    txParams.numUsers = 118;
+    txParams.numUsers = 4;
     
 %     % Assuming the CSI (Rayleigh Fading)
 % %     txParams.CSI = randn(txParams.numUsers, 1);
@@ -60,8 +62,7 @@ function txParams = txConfig()
     for iter_user = 1: txParams.numUsers
         ULTx.zcSeq(:, iter_user) = lteZadoffChuSeq(ULTx.zcRoots(iter_user), ULTx.zcLen);
     end
-    
-    zcSeq(:, 1) = ones(59, 1);
+ 
     txParams.ULTx = ULTx;
     
 end

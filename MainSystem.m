@@ -1,6 +1,6 @@
 function MainSystem()
 
-    sysPower = 1;
+    sysPower = 5;
     addpath(genpath('Blocks'));
 
     %% System Initialisation
@@ -40,13 +40,12 @@ function MainSystem()
 
     %% Channel Model
 
-    % We assume that the CSI is perfectly known at the Tx
-    txDataStreamMat = txParams.CSI' .* txOut;
-
-    % Noise and Channel Tap
+    % For Simulation purposes, the flat fading channel will added at the receiver
+    
+    % Noise
 
     SNR = txParams.SNR;
-    noiseMat = (max(txParams.powerLevels) / sqrt(2 * SNR)) .* (randn(size(txDataStreamMat)) + (1i) * randn(size(txDataStreamMat)));
+    noiseMat = (1 / sqrt(2 * SNR)) .* (randn(size(txOut)) + (1i) * randn(size(txOut)));
 
     signalPower = norm(txOut) .^ 2;
     noisePower = norm(noiseMat) .^ 2;
@@ -54,12 +53,12 @@ function MainSystem()
     empSNR = signalPower / noisePower;
     empSNRdb = 10 * log10(empSNR);
 
-    rxDataStreamMat = txDataStreamMat + noiseMat;
+    rxDataStream = txOut + noiseMat;
 
 
     %% Receiver
     % Detecting the information from received signal
-    rxBitStreamMat = Receiver(rxDataStreamMat, txParams);
+    rxBitStreamMat = Receiver(rxDataStream, txParams);
 
     % Error in received bitstream
     errBits = sum(bitxor(txBitStreamMat, rxBitStreamMat));
@@ -70,5 +69,5 @@ function MainSystem()
         disp(['Err Bits: ', num2str(errBits)]);
     end
 
-
+    disp(txParams.CSI(txParams.sorted_CSI_Idx));
 end
